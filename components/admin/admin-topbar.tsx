@@ -1,9 +1,17 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Boxes, ClipboardCheck, LayoutDashboard, Store, Truck } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import {
+  Boxes,
+  ClipboardCheck,
+  LayoutDashboard,
+  LogOut,
+  Store,
+  Truck,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
+import { signOut } from "@/lib/auth"
 
 const nav = [
   { href: "/admin", label: "Panel", icon: LayoutDashboard },
@@ -14,6 +22,13 @@ const nav = [
 
 export function AdminTopbar() {
   const pathname = usePathname()
+  const router = useRouter()
+
+  function handleLogout() {
+    signOut()
+    router.replace("/admin/login")
+  }
+
   return (
     <div className="flex flex-wrap items-center gap-x-1.5 gap-y-2 border-b border-border bg-marron px-3 py-2 md:hidden">
       {nav.map((n) => {
@@ -37,13 +52,24 @@ export function AdminTopbar() {
           </Link>
         )
       })}
-      <Link
-        href="/"
-        className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-turquesa px-3 py-1.5 text-xs font-semibold text-[#26403e] transition-colors hover:bg-turquesa/85"
-      >
-        <Store className="size-3.5" />
-        Ver portal cliente
-      </Link>
+      <div className="ml-auto flex items-center gap-1.5">
+        <Link
+          href="/"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-turquesa px-3 py-1.5 text-xs font-semibold text-[#26403e] transition-colors hover:bg-turquesa/85"
+        >
+          <Store className="size-3.5" />
+          Ver portal cliente
+        </Link>
+        <button
+          type="button"
+          onClick={handleLogout}
+          aria-label="Cerrar sesión"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-white/20"
+        >
+          <LogOut className="size-3.5" />
+          Salir
+        </button>
+      </div>
     </div>
   )
 }

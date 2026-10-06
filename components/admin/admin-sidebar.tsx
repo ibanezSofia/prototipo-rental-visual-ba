@@ -1,15 +1,17 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import {
   LayoutDashboard,
   Boxes,
   ClipboardCheck,
   Truck,
   Store,
+  LogOut,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { signOut } from "@/lib/auth"
 
 const nav = [
   { href: "/admin", label: "Panel", icon: LayoutDashboard },
@@ -20,6 +22,12 @@ const nav = [
 
 export function AdminSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+
+  function handleLogout() {
+    signOut()
+    router.replace("/admin/login")
+  }
 
   return (
     <aside className="hidden w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex">
@@ -67,6 +75,14 @@ export function AdminSidebar() {
           <Store className="size-4" />
           Ver portal cliente
         </Link>
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+        >
+          <LogOut className="size-4" />
+          Cerrar sesión
+        </button>
       </div>
     </aside>
   )
