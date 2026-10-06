@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import {
   LayoutDashboard,
+  BarChart3,
   Boxes,
   ClipboardCheck,
   Truck,
@@ -15,6 +16,7 @@ import { signOut } from "@/lib/auth"
 
 const nav = [
   { href: "/admin", label: "Panel", icon: LayoutDashboard },
+  { href: "/admin/resumen", label: "Resumen", icon: BarChart3 },
   { href: "/admin/inventario", label: "Inventario", icon: Boxes },
   { href: "/admin/pre-reservas", label: "Pre-reservas", icon: ClipboardCheck },
   { href: "/admin/alquileres", label: "Alquileres y mora", icon: Truck },

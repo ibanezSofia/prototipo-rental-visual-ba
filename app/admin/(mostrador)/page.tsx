@@ -12,7 +12,6 @@ import {
   ALQUILERES_ACTIVOS,
   EQUIPOS,
   PRE_RESERVAS,
-  formatARS,
 } from "@/lib/data"
 import { operativoConfig, stockConfig } from "@/lib/status"
 
