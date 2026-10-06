@@ -1,8 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { Search, MapPin } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import { ChevronDown, Search, MapPin } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   CATEGORIAS,
@@ -11,7 +10,12 @@ import {
   type EstadoOperativo,
   type EstadoStock,
 } from "@/lib/data"
-import { operativoConfig, stockConfig } from "@/lib/status"
+import {
+  operativoConfig,
+  stockConfig,
+  toneClasses,
+  type BadgeTone,
+} from "@/lib/status"
 
 type Row = {
   id: string
@@ -35,6 +39,42 @@ const operativoOpciones: EstadoOperativo[] = [
   "EN_REPARACION",
   "SIN_REVISAR",
 ]
+
+function EstadoSelect({
+  value,
+  options,
+  config,
+  ariaLabel,
+  onChange,
+}: {
+  value: string
+  options: readonly string[]
+  config: Record<string, { label: string; tone: BadgeTone }>
+  ariaLabel: string
+  onChange: (value: string) => void
+}) {
+  const current = config[value]
+  return (
+    <span className="relative inline-flex">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        aria-label={ariaLabel}
+        className={cn(
+          "inline-flex h-7 cursor-pointer appearance-none items-center gap-1.5 rounded-full border py-0 pl-2.5 pr-7 text-xs font-medium whitespace-nowrap outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50",
+          toneClasses[current.tone],
+        )}
+      >
+        {options.map((op) => (
+          <option key={op} value={op} className="bg-card text-foreground">
+            {config[op].label}
+          </option>
+        ))}
+      </select>
+      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-3 -translate-y-1/2" />
+    </span>
+  )
+}
 
 export function InventarioTabla() {
   const [rows, setRows] = useState<Row[]>(
@@ -110,8 +150,6 @@ export function InventarioTabla() {
           </thead>
           <tbody>
             {filtered.map((r) => {
-              const s = stockConfig[r.stock]
-              const o = operativoConfig[r.operatividad]
               return (
                 <tr
                   key={r.id}
@@ -133,46 +171,26 @@ export function InventarioTabla() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex flex-col gap-1.5">
-                      <Badge tone={s.tone}>{s.label}</Badge>
-                      <select
-                        value={r.stock}
-                        onChange={(e) =>
-                          update(r.id, {
-                            stock: e.target.value as EstadoStock,
-                          })
-                        }
-                        className="h-8 rounded-md border border-border bg-card px-2 text-xs text-foreground outline-none focus-visible:border-ring"
-                        aria-label={`Cambiar stock de ${r.nombre}`}
-                      >
-                        {stockOpciones.map((op) => (
-                          <option key={op} value={op}>
-                            {stockConfig[op].label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <EstadoSelect
+                      value={r.stock}
+                      options={stockOpciones}
+                      config={stockConfig}
+                      ariaLabel={`Cambiar stock de ${r.nombre}`}
+                      onChange={(v) =>
+                        update(r.id, { stock: v as EstadoStock })
+                      }
+                    />
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex flex-col gap-1.5">
-                      <Badge tone={o.tone}>{o.label}</Badge>
-                      <select
-                        value={r.operatividad}
-                        onChange={(e) =>
-                          update(r.id, {
-                            operatividad: e.target.value as EstadoOperativo,
-                          })
-                        }
-                        className="h-8 rounded-md border border-border bg-card px-2 text-xs text-foreground outline-none focus-visible:border-ring"
-                        aria-label={`Cambiar operatividad de ${r.nombre}`}
-                      >
-                        {operativoOpciones.map((op) => (
-                          <option key={op} value={op}>
-                            {operativoConfig[op].label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <EstadoSelect
+                      value={r.operatividad}
+                      options={operativoOpciones}
+                      config={operativoConfig}
+                      ariaLabel={`Cambiar operatividad de ${r.nombre}`}
+                      onChange={(v) =>
+                        update(r.id, { operatividad: v as EstadoOperativo })
+                      }
+                    />
                   </td>
                 </tr>
               )
@@ -183,8 +201,6 @@ export function InventarioTabla() {
 
       <div className="mt-4 space-y-3 lg:hidden">
         {filtered.map((r) => {
-          const s = stockConfig[r.stock]
-          const o = operativoConfig[r.operatividad]
           return (
             <div
               key={r.id}
@@ -207,53 +223,31 @@ export function InventarioTabla() {
               </div>
 
               <div className="mt-3 grid grid-cols-2 gap-3">
-                <div className="flex min-w-0 flex-col gap-1.5">
+                <div className="flex min-w-0 flex-col items-start gap-1.5">
                   <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                     Stock
                   </span>
-                  <Badge tone={s.tone} className="whitespace-normal text-left">
-                    {s.label}
-                  </Badge>
-                  <select
+                  <EstadoSelect
                     value={r.stock}
-                    onChange={(e) =>
-                      update(r.id, {
-                        stock: e.target.value as EstadoStock,
-                      })
-                    }
-                    className="h-8 w-full rounded-md border border-border bg-card px-2 text-xs text-foreground outline-none focus-visible:border-ring"
-                    aria-label={`Cambiar stock de ${r.nombre}`}
-                  >
-                    {stockOpciones.map((op) => (
-                      <option key={op} value={op}>
-                        {stockConfig[op].label}
-                      </option>
-                    ))}
-                  </select>
+                    options={stockOpciones}
+                    config={stockConfig}
+                    ariaLabel={`Cambiar stock de ${r.nombre}`}
+                    onChange={(v) => update(r.id, { stock: v as EstadoStock })}
+                  />
                 </div>
-                <div className="flex min-w-0 flex-col gap-1.5">
+                <div className="flex min-w-0 flex-col items-start gap-1.5">
                   <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                     Operatividad
                   </span>
-                  <Badge tone={o.tone} className="whitespace-normal text-left">
-                    {o.label}
-                  </Badge>
-                  <select
+                  <EstadoSelect
                     value={r.operatividad}
-                    onChange={(e) =>
-                      update(r.id, {
-                        operatividad: e.target.value as EstadoOperativo,
-                      })
+                    options={operativoOpciones}
+                    config={operativoConfig}
+                    ariaLabel={`Cambiar operatividad de ${r.nombre}`}
+                    onChange={(v) =>
+                      update(r.id, { operatividad: v as EstadoOperativo })
                     }
-                    className="h-8 w-full rounded-md border border-border bg-card px-2 text-xs text-foreground outline-none focus-visible:border-ring"
-                    aria-label={`Cambiar operatividad de ${r.nombre}`}
-                  >
-                    {operativoOpciones.map((op) => (
-                      <option key={op} value={op}>
-                        {operativoConfig[op].label}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
               </div>
             </div>
