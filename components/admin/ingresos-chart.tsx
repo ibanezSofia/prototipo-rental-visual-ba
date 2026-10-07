@@ -1,19 +1,18 @@
 import { Badge } from "@/components/ui/badge"
-import {
-  EJES_Y,
-  INGRESOS_MENSUALES,
-  MESES_ETIQUETAS,
-  VANACION_MENSUAL,
-} from "@/lib/dashboard"
+import { ingresosMensuales } from "@/lib/metricas"
 
 const W = 640
 const H = 260
-const PAD_X = 38
+const PAD_X = 48
 const PAD_TOP = 18
 const PAD_BOTTOM = 34
 
+function formatK(v: number) {
+  return `$${v.toFixed(0).replace(".", ",")}k`
+}
+
 function buildPath(values: number[]) {
-  const max = 320
+  const max = Math.max(...values)
   const innerW = W - PAD_X
   const innerH = H - PAD_TOP - PAD_BOTTOM
   const x = (i: number) => PAD_X + (i / (values.length - 1)) * innerW
@@ -31,9 +30,21 @@ function buildPath(values: number[]) {
   return { d, points }
 }
 
+function buildEjes(maxVal: number) {
+  const innerH = H - PAD_TOP - PAD_BOTTOM
+  const pasos = 4
+  return Array.from({ length: pasos + 1 }, (_, i) => {
+    const valor = (maxVal / pasos) * i
+    const y = PAD_TOP + innerH - (valor / maxVal) * innerH
+    return { valor, y }
+  })
+}
+
 export function IngresosChart() {
-  const { d, points } = buildPath([...INGRESOS_MENSUALES])
-  const max = 320
+  const serie = ingresosMensuales()
+  const valores = serie.valores.map((v) => Math.round(v / 1000))
+  const maxVal = Math.max(...valores)
+  const { d, points } = buildPath(valores)
   const innerW = W - PAD_X
   const innerH = H - PAD_TOP - PAD_BOTTOM
 
@@ -44,35 +55,32 @@ export function IngresosChart() {
       role="img"
       aria-label="Gráfico de ingresos mensuales"
     >
-      {EJES_Y.map((label, i) => {
-        const y = PAD_TOP + (i / (EJES_Y.length - 1)) * innerH
-        return (
-          <g key={label}>
-            <line
-              x1={PAD_X}
-              x2={W - 4}
-              y1={y}
-              y2={y}
-              className="stroke-border"
-              strokeDasharray="3 3"
-              strokeWidth={1}
-            />
-            <text
-              x={PAD_X - 8}
-              y={y + 4}
-              textAnchor="end"
-              className="fill-muted-foreground text-[11px]"
-            >
-              {label}
-            </text>
-          </g>
-        )
-      })}
+      {buildEjes(maxVal).map(({ valor, y }) => (
+        <g key={valor}>
+          <line
+            x1={PAD_X}
+            x2={W - 4}
+            y1={y}
+            y2={y}
+            className="stroke-border"
+            strokeDasharray="3 3"
+            strokeWidth={1}
+          />
+          <text
+            x={PAD_X - 8}
+            y={y + 4}
+            textAnchor="end"
+            className="fill-muted-foreground text-[11px]"
+          >
+            {formatK(valor)}
+          </text>
+        </g>
+      ))}
 
-      {MESES_ETIQUETAS.map((m, i) => (
+      {serie.etiquetas.map((m, i) => (
         <text
           key={m}
-          x={PAD_X + (i / (MESES_ETIQUETAS.length - 1)) * innerW}
+          x={PAD_X + (i / (serie.etiquetas.length - 1)) * innerW}
           y={H - 10}
           textAnchor="middle"
           className="fill-muted-foreground text-[11px]"
@@ -103,7 +111,7 @@ export function IngresosChart() {
             textAnchor="middle"
             className="fill-muted-foreground text-[10px] font-semibold"
           >
-            ${INGRESOS_MENSUALES[i]}k
+            {formatK(valores[i])}
           </text>
         </g>
       ))}
@@ -112,6 +120,7 @@ export function IngresosChart() {
 }
 
 export function IngresosCard() {
+  const { variacionGlobal } = ingresosMensuales()
   return (
     <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
       <div className="flex items-start justify-between gap-3">
@@ -123,7 +132,7 @@ export function IngresosCard() {
             Evolución de los últimos 6 meses
           </p>
         </div>
-        <Badge tone="verde">{VANACION_MENSUAL}</Badge>
+        <Badge tone="verde">{variacionGlobal}</Badge>
       </div>
       <div className="mt-4">
         <IngresosChart />

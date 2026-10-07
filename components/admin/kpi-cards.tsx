@@ -1,5 +1,12 @@
 import { TrendingUp, Layers, Boxes, Gauge } from "lucide-react"
-import { DASHBOARD_METRICS } from "@/lib/dashboard"
+import {
+  alquileresActivos,
+  equiposDisponibles,
+  formatARS,
+  ingresosDelMes,
+  ocupacionPromedio,
+  variacionMensual,
+} from "@/lib/metricas"
 import { cn } from "@/lib/utils"
 
 const iconos = {
@@ -16,10 +23,51 @@ const tonos = {
   ocupacion: "bg-destructive/12 text-destructive",
 } as const
 
+function variaciones() {
+  const variacion = variacionMensual()
+  const signo = variacion >= 0 ? "+" : ""
+  const puntos = ocupacionPromedio().toFixed(0)
+  return {
+    ingresos: `${signo}${variacion.toFixed(0).replace(".", ",")}% vs. mes anterior`,
+    ocupacion: `${puntos}% de la flota alquilada`,
+  }
+}
+
 export function KpiCards() {
+  const { disponibles, total } = equiposDisponibles()
+  const activos = alquileresActivos()
+  const v = variaciones()
+
+  const metricas = [
+    {
+      id: "ingresos" as const,
+      titulo: "Ingresos del mes",
+      valor: formatARS(ingresosDelMes()),
+      subtexto: v.ingresos,
+    },
+    {
+      id: "alquileres" as const,
+      titulo: "Alquileres activos",
+      valor: String(activos),
+      subtexto: "en curso ahora",
+    },
+    {
+      id: "equipos" as const,
+      titulo: "Equipos disponibles",
+      valor: String(disponibles),
+      subtexto: `de ${total} en inventario`,
+    },
+    {
+      id: "ocupacion" as const,
+      titulo: "Ocupación promedio",
+      valor: `${ocupacionPromedio().toFixed(0)}%`,
+      subtexto: v.ocupacion,
+    },
+  ]
+
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-      {DASHBOARD_METRICS.map((m) => {
+      {metricas.map((m) => {
         const Icon = iconos[m.id]
         return (
           <div

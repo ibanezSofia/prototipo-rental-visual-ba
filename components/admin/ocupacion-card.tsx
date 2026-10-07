@@ -1,20 +1,25 @@
-import { OCUPACION_EQUIPOS } from "@/lib/dashboard"
+import { ocupacionPorEquipo } from "@/lib/metricas"
 
 export function OcupacionCard() {
+  const equipos = ocupacionPorEquipo()
+
   return (
     <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
       <h2 className="font-display text-base font-semibold text-foreground">
         Ocupación por equipo
       </h2>
       <p className="text-xs text-muted-foreground">
-        Equipos con mayor demanda
+        Equipos con mayor demanda histórica
       </p>
 
       <ul className="mt-5 space-y-4">
-        {OCUPACION_EQUIPOS.map((e) => (
+        {equipos.map((e) => (
           <li key={e.nombre}>
             <div className="flex items-center justify-between gap-3 text-sm">
               <span className="font-medium text-foreground">{e.nombre}</span>
+              <span className="text-xs text-muted-foreground">
+                {e.operaciones} operaciones
+              </span>
               <span className="font-display font-bold text-foreground">
                 {e.porcentaje}%
               </span>

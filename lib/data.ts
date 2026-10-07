@@ -59,7 +59,29 @@ export type Alquiler = {
   total: number
   mora?: boolean
   diasAtraso?: number
+  /** El alquiler vence dentro de la semana actual */
+  proximoVencer?: boolean
 }
+
+/** Un alquiler ya facturado/registrado, agrupable por mes */
+export type RegistroHistorial = {
+  id: string
+  cliente: string
+  equipos: string[]
+  /** Mes de facturación en formato "YYYY-MM" */
+  mes: string
+  total: number
+}
+
+/** Meses del histórico de facturación, del más antiguo al actual */
+export const MESES_HISTORICO = [
+  { key: "2026-04", etiqueta: "Abr" },
+  { key: "2026-05", etiqueta: "May" },
+  { key: "2026-06", etiqueta: "Jun" },
+  { key: "2026-07", etiqueta: "Jul" },
+  { key: "2026-08", etiqueta: "Ago" },
+  { key: "2026-09", etiqueta: "Sep" },
+] as const
 
 const img = {
   camara: "/equipos/camara.png",
@@ -347,6 +369,7 @@ export const ALQUILERES_ACTIVOS: Alquiler[] = [
     fechaInicio: "22/09",
     fechaDevolucion: "22/09",
     total: 174000,
+    proximoVencer: true,
   },
   {
     id: "RV-2033",
@@ -358,6 +381,7 @@ export const ALQUILERES_ACTIVOS: Alquiler[] = [
     total: 38000,
     mora: true,
     diasAtraso: 1,
+    proximoVencer: true,
   },
   {
     id: "RV-2029",
@@ -370,6 +394,36 @@ export const ALQUILERES_ACTIVOS: Alquiler[] = [
     mora: true,
     diasAtraso: 2,
   },
+]
+
+export const ALQUILERES_HISTORIAL: RegistroHistorial[] = [
+  { id: "RV-2201", cliente: "Estudio Vértigo", equipos: ["Sony FX6 Full Frame"], mes: "2026-04", total: 42000 },
+  { id: "RV-2202", cliente: "Cine del Sur", equipos: ["Blackmagic URSA 12K", "Set Sigma Cine 24-35-50mm"], mes: "2026-04", total: 89000 },
+  { id: "RV-2203", cliente: "Maltés Producciones", equipos: ["Aputure 600D Pro"], mes: "2026-04", total: 22000 },
+  { id: "RV-2204", cliente: "Sonido Plano", equipos: ["Zoom F8n Pro", "Sennheiser MKH 416"], mes: "2026-04", total: 27500 },
+  { id: "RV-2211", cliente: "Andina Films", equipos: ["Sony FX6 Full Frame"], mes: "2026-05", total: 42000 },
+  { id: "RV-2212", cliente: "Productora Norte", equipos: ["Blackmagic URSA 12K"], mes: "2026-05", total: 58000 },
+  { id: "RV-2213", cliente: "Cancha Libre TV", equipos: ["Canon CN-E 70-200mm"], mes: "2026-05", total: 27000 },
+  { id: "RV-2214", cliente: "Estación Sonora", equipos: ["Zoom F8n Pro", "Sennheiser MKH 416"], mes: "2026-05", total: 27500 },
+  { id: "RV-2221", cliente: "Vértigo Films", equipos: ["Sony FX6 Full Frame"], mes: "2026-06", total: 42000 },
+  { id: "RV-2222", cliente: "Pampa Visual", equipos: ["Blackmagic URSA 12K", "Set Sigma Cine 24-35-50mm"], mes: "2026-06", total: 89000 },
+  { id: "RV-2223", cliente: "Río Sound", equipos: ["Zoom F8n Pro", "Sennheiser MKH 416"], mes: "2026-06", total: 27500 },
+  { id: "RV-2224", cliente: "Norte Eventos", equipos: ["Aputure 600D Pro"], mes: "2026-06", total: 22000 },
+  { id: "RV-2231", cliente: "Frontera Cine", equipos: ["Sony FX6 Full Frame"], mes: "2026-07", total: 42000 },
+  { id: "RV-2232", cliente: "Litoral Producciones", equipos: ["Blackmagic URSA 12K", "Canon CN-E 70-200mm"], mes: "2026-07", total: 85000 },
+  { id: "RV-2233", cliente: "Grillo Audiovisual", equipos: ["Aputure 600D Pro", "Astera Titan Tube (x4)"], mes: "2026-07", total: 48000 },
+  { id: "RV-2234", cliente: "Duna Sonora", equipos: ["Sennheiser MKH 416"], mes: "2026-07", total: 9500 },
+  { id: "RV-2241", cliente: "Estudio Vértigo", equipos: ["Sony FX6 Full Frame"], mes: "2026-08", total: 42000 },
+  { id: "RV-2242", cliente: "Cine del Sur", equipos: ["Blackmagic URSA 12K", "Set Sigma Cine 24-35-50mm"], mes: "2026-08", total: 89000 },
+  { id: "RV-2243", cliente: "Cancha Libre TV", equipos: ["Canon CN-E 70-200mm"], mes: "2026-08", total: 27000 },
+  { id: "RV-2244", cliente: "Estación Sonora", equipos: ["Zoom F8n Pro", "Sennheiser MKH 416"], mes: "2026-08", total: 27500 },
+  { id: "RV-2245", cliente: "Pampa Visual", equipos: ["Astera Titan Tube (x4)"], mes: "2026-08", total: 26000 },
+  { id: "RV-2251", cliente: "Productora Norte", equipos: ["Blackmagic URSA 12K"], mes: "2026-09", total: 174000 },
+  { id: "RV-2252", cliente: "Andina Films", equipos: ["Sony FX6 Full Frame"], mes: "2026-09", total: 42000 },
+  { id: "RV-2253", cliente: "Río Sound", equipos: ["Zoom F8n Pro", "Sennheiser MKH 416"], mes: "2026-09", total: 27500 },
+  { id: "RV-2254", cliente: "Norte Eventos", equipos: ["Aputure 600D Pro"], mes: "2026-09", total: 22000 },
+  { id: "RV-2255", cliente: "Sonidista M. Paz", equipos: ["Sennheiser MKH 416"], mes: "2026-09", total: 38000 },
+  { id: "RV-2029", cliente: "Colectivo Audiovisual La Boca", equipos: ["Aputure 600D Pro"], mes: "2026-09", total: 110000 },
 ]
 
 export function formatARS(n: number) {
