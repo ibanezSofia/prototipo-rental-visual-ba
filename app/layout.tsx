@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Inter, Space_Grotesk } from 'next/font/google'
+import { EquiposProvider } from '@/lib/equipos-context'
 import './globals.css'
 
 const inter = Inter({
@@ -52,7 +53,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${inter.variable} ${display.variable} font-sans antialiased`}>
-        {children}
+        <EquiposProvider>{children}</EquiposProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

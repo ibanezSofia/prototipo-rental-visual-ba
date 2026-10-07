@@ -1,15 +1,16 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { ChevronDown, Search, MapPin } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   CATEGORIAS,
-  EQUIPOS,
+  formatARS,
   type Categoria,
   type EstadoOperativo,
   type EstadoStock,
 } from "@/lib/data"
+import { useEquipos } from "@/lib/equipos-context"
 import {
   operativoConfig,
   stockConfig,
@@ -25,6 +26,7 @@ type Row = {
   ubicacion: string
   stock: EstadoStock
   operatividad: EstadoOperativo
+  precioDia: number
 }
 
 const stockOpciones: EstadoStock[] = [
@@ -76,9 +78,58 @@ function EstadoSelect({
   )
 }
 
+function PrecioInput({
+  value,
+  ariaLabel,
+  onCommit,
+}: {
+  value: number
+  ariaLabel: string
+  onCommit: (value: number) => void
+}) {
+  const [draft, setDraft] = useState(String(value))
+
+  useEffect(() => {
+    setDraft(String(value))
+  }, [value])
+
+  function commit() {
+    const n = Math.round(Number(draft))
+    if (Number.isFinite(n) && n >= 0) onCommit(n)
+    else setDraft(String(value))
+  }
+
+  return (
+    <div className="flex flex-col items-start gap-0.5">
+      <span className="relative inline-flex items-center">
+        <span className="pointer-events-none absolute left-2.5 text-xs text-muted-foreground">
+          $
+        </span>
+        <input
+          type="number"
+          min={0}
+          step={500}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={commit}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") e.currentTarget.blur()
+          }}
+          aria-label={ariaLabel}
+          className="h-8 w-28 rounded-lg border border-border bg-card pl-6 pr-2 text-right text-sm font-medium text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40"
+        />
+      </span>
+      <span className="text-[11px] text-muted-foreground">
+        {formatARS(value)} por día
+      </span>
+    </div>
+  )
+}
+
 export function InventarioTabla() {
+  const { equipos, actualizarPrecio } = useEquipos()
   const [rows, setRows] = useState<Row[]>(
-    EQUIPOS.map((e) => ({
+    equipos.map((e) => ({
       id: e.id,
       codigo: e.codigo,
       nombre: e.nombre,
@@ -86,6 +137,7 @@ export function InventarioTabla() {
       ubicacion: e.ubicacion,
       stock: e.stock,
       operatividad: e.operatividad,
+      precioDia: e.precioDia,
     })),
   )
   const [q, setQ] = useState("")
@@ -105,6 +157,11 @@ export function InventarioTabla() {
 
   function update(id: string, patch: Partial<Row>) {
     setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)))
+  }
+
+  function updatePrecio(id: string, precioDia: number) {
+    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, precioDia } : r)))
+    actualizarPrecio(id, precioDia)
   }
 
   return (
@@ -144,6 +201,7 @@ export function InventarioTabla() {
             <tr className="border-b border-border bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground">
               <th className="px-4 py-3 font-semibold">Equipo</th>
               <th className="px-4 py-3 font-semibold">Ubicación</th>
+              <th className="px-4 py-3 font-semibold">Precio / día</th>
               <th className="px-4 py-3 font-semibold">Stock</th>
               <th className="px-4 py-3 font-semibold">Operatividad</th>
             </tr>
@@ -169,6 +227,13 @@ export function InventarioTabla() {
                       <MapPin className="size-3.5" />
                       {r.ubicacion}
                     </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <PrecioInput
+                      value={r.precioDia}
+                      ariaLabel={`Cambiar precio de ${r.nombre}`}
+                      onCommit={(v) => updatePrecio(r.id, v)}
+                    />
                   </td>
                   <td className="px-4 py-3">
                     <EstadoSelect
@@ -220,6 +285,17 @@ export function InventarioTabla() {
                   <MapPin className="size-3.5" />
                   {r.ubicacion}
                 </span>
+              </div>
+
+              <div className="mt-3 flex flex-col items-start gap-1.5">
+                <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  Precio / día
+                </span>
+                <PrecioInput
+                  value={r.precioDia}
+                  ariaLabel={`Cambiar precio de ${r.nombre}`}
+                  onCommit={(v) => updatePrecio(r.id, v)}
+                />
               </div>
 
               <div className="mt-3 grid grid-cols-2 gap-3">

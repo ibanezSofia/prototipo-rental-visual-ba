@@ -7,6 +7,7 @@ import { Modal } from "@/components/ui/modal"
 import { Badge } from "@/components/ui/badge"
 import { CalendarioDisponibilidad } from "@/components/cliente/calendario-disponibilidad"
 import { formatARS, type Equipo } from "@/lib/data"
+import { useEquipos } from "@/lib/equipos-context"
 import { operativoConfig, stockConfig } from "@/lib/status"
 import {
   diasDeRenta,
@@ -17,6 +18,8 @@ import {
 } from "@/lib/horarios"
 
 export function ReservarPanel({ equipo }: { equipo: Equipo }) {
+  const { getEquipo } = useEquipos()
+  const precioDia = getEquipo(equipo.id)?.precioDia ?? equipo.precioDia
   const [rango, setRango] = useState<{
     inicio: string | null
     fin: string | null
@@ -32,7 +35,7 @@ export function ReservarPanel({ equipo }: { equipo: Equipo }) {
     () => diasDeRenta(rango.inicio ?? "", rango.fin ?? ""),
     [rango.inicio, rango.fin],
   )
-  const total = dias * equipo.precioDia
+  const total = dias * precioDia
   const rangoListo = dias > 0
   const puedeReservar = disponible && rangoListo
 
@@ -46,7 +49,7 @@ export function ReservarPanel({ equipo }: { equipo: Equipo }) {
       <div className="flex items-baseline justify-between">
         <div>
           <p className="font-display text-2xl font-bold text-foreground">
-            {formatARS(equipo.precioDia)}
+            {formatARS(precioDia)}
           </p>
           <p className="text-xs text-muted-foreground">por día · IVA incluido</p>
         </div>
@@ -81,7 +84,7 @@ export function ReservarPanel({ equipo }: { equipo: Equipo }) {
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground">Costo de alquiler</span>
           <span className="font-semibold text-foreground">
-            {formatARS(equipo.precioDia)} / día
+            {formatARS(precioDia)} / día
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-1.5 pt-1">
@@ -128,7 +131,7 @@ export function ReservarPanel({ equipo }: { equipo: Equipo }) {
           </div>
           <div className="flex justify-between text-muted-foreground">
             <span>
-              {formatARS(equipo.precioDia)} × {dias}{" "}
+              {formatARS(precioDia)} × {dias}{" "}
               {dias === 1 ? "día" : "días"}
             </span>
             <span>{formatARS(total)}</span>

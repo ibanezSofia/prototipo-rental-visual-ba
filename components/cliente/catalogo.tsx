@@ -3,18 +3,20 @@
 import { useMemo, useState } from "react"
 import { Search, SlidersHorizontal } from "lucide-react"
 import { EquipoCard } from "@/components/cliente/equipo-card"
-import { CATEGORIAS, EQUIPOS, type Categoria } from "@/lib/data"
+import { CATEGORIAS, type Categoria } from "@/lib/data"
+import { useEquipos } from "@/lib/equipos-context"
 import { cn } from "@/lib/utils"
 
 type Filtro = "TODOS" | Categoria
 
 export function Catalogo() {
+  const { equipos } = useEquipos()
   const [q, setQ] = useState("")
   const [cat, setCat] = useState<Filtro>("TODOS")
   const [soloDisponibles, setSoloDisponibles] = useState(false)
 
   const resultados = useMemo(() => {
-    return EQUIPOS.filter((e) => {
+    return equipos.filter((e) => {
       const matchCat = cat === "TODOS" || e.categoria === cat
       const matchQ =
         q.trim() === "" ||
@@ -23,7 +25,7 @@ export function Catalogo() {
       const matchDisp = !soloDisponibles || e.stock === "EN_STOCK"
       return matchCat && matchQ && matchDisp
     })
-  }, [q, cat, soloDisponibles])
+  }, [equipos, q, cat, soloDisponibles])
 
   const chips: Filtro[] = ["TODOS", ...CATEGORIAS]
 
