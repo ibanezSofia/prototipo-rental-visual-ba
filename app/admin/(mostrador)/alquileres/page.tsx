@@ -12,7 +12,7 @@ export default function AlquileresPage() {
           Alquileres y mora
         </h1>
         <p className="text-sm text-muted-foreground">
-          Registrá devoluciones (check-in) y controlá las entregas vencidas.
+          Registrá devoluciones (check-in) y controlá las entregas que están vencidas.
         </p>
       </header>
       <AlquileresPanel />
